@@ -1,0 +1,96 @@
+# Cost + credit ledger driving the router.
+# cost_per_1k is USD per 1k tokens (in/out averaged) or per call for search.
+# free: true            -> usable with no spend (local, or a real free tier)
+# credits.remaining_usd -> vendor credits you already hold (spend before cash)
+
+llm:
+  - name: echo          # deterministic stub, no deps. Always available.
+    free: true
+    local: true
+    cost_per_1k: 0.0
+  - name: ollama
+    free: true
+    local: true
+    cost_per_1k: 0.0
+    requires: [OLLAMA_BASE_URL]
+  - name: groq
+    free: true          # generous free tier, rate limited
+    cost_per_1k: 0.0
+    requires: [GROQ_API_KEY]
+  - name: gemini
+    free: true          # free tier on flash models
+    cost_per_1k: 0.0
+    requires: [GEMINI_API_KEY]
+  - name: openrouter
+    cost_per_1k: 0.10
+    requires: [OPENROUTER_API_KEY]
+    credits: { remaining_usd: 0, expires: null }
+  - name: anthropic
+    cost_per_1k: 0.90
+    requires: [ANTHROPIC_API_KEY]
+    credits: { remaining_usd: 0, expires: null }
+  - name: openai
+    cost_per_1k: 0.60
+    requires: [OPENAI_API_KEY]
+    credits: { remaining_usd: 0, expires: null }
+
+embeddings:
+  - name: fastembed
+    free: true
+    local: true
+    cost_per_1k: 0.0
+  - name: gemini
+    free: true
+    cost_per_1k: 0.0
+    requires: [GEMINI_API_KEY]
+  - name: openai
+    cost_per_1k: 0.02
+    requires: [OPENAI_API_KEY]
+
+vector:
+  - name: chroma
+    free: true
+    local: true
+    cost_per_1k: 0.0
+  - name: qdrant
+    free: true          # 1GB free cluster
+    cost_per_1k: 0.0
+    requires: [QDRANT_URL]
+  - name: pgvector
+    cost_per_1k: 0.0
+    requires: [DATABASE_URL]
+
+search:
+  - name: duckduckgo
+    free: true
+    cost_per_1k: 0.0
+  - name: tavily
+    free: true          # 1k credits/mo free
+    cost_per_1k: 0.0
+    requires: [TAVILY_API_KEY]
+  - name: brave
+    cost_per_1k: 5.0
+    requires: [BRAVE_API_KEY]
+
+storage:
+  - name: sqlite
+    free: true
+    local: true
+    cost_per_1k: 0.0
+  - name: postgres
+    cost_per_1k: 0.0
+    requires: [DATABASE_URL]
+
+obs:
+  - name: noop
+    free: true
+    local: true
+    cost_per_1k: 0.0
+  - name: console
+    free: true
+    local: true
+    cost_per_1k: 0.0
+  - name: langfuse
+    free: true          # free hobby tier
+    cost_per_1k: 0.0
+    requires: [LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY]

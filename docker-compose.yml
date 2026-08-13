@@ -1,0 +1,20 @@
+# Optional local infrastructure. Everything here has a free/local alternative
+# already wired in, so bring these up only if you want the hosted-style path.
+services:
+  qdrant:
+    image: qdrant/qdrant:latest
+    ports: ["6333:6333"]
+    volumes: ["./.data/qdrant:/qdrant/storage"]
+
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: agent
+    ports: ["5432:5432"]
+    volumes: ["./.data/pg:/var/lib/postgresql/data"]
+
+  ollama:
+    image: ollama/ollama:latest
+    ports: ["11434:11434"]
+    volumes: ["./.data/ollama:/root/.ollama"]
