@@ -24,6 +24,24 @@ export class ApiError extends Error {
   }
 }
 
+// FastAPI 422 responses put an array of validation-error objects in `detail`
+// (e.g. [{loc: ["body", "input"], msg: "Field required", ...}]). Rendering
+// those objects directly would crash React, so flatten them to one string.
+function formatDetail(detail: HttpErrorDetail["detail"]): string | undefined {
+  if (typeof detail === "string") return detail;
+  if (!Array.isArray(detail) || detail.length === 0) return undefined;
+  const parts = detail.map((item) => {
+    if (item == null || typeof item !== "object") return String(item);
+    const err = item as { loc?: unknown[]; msg?: unknown };
+    const path = Array.isArray(err.loc)
+      ? err.loc.map(String).filter((p) => p !== "body").join(".")
+      : "";
+    const msg = typeof err.msg === "string" ? err.msg : JSON.stringify(err);
+    return path ? `${path}: ${msg}` : msg;
+  });
+  return parts.join("; ");
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   let res: Response;
   try {
@@ -37,7 +55,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     let detail: string | undefined;
     try {
       const body = (await res.json()) as HttpErrorDetail;
-      detail = body.detail;
+      detail = formatDetail(body.detail);
     } catch {
       // Non-JSON error body; leave detail undefined.
     }

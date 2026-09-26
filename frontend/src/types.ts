@@ -81,7 +81,9 @@ export interface RunResponse {
   trace: TraceEntry[];
 }
 
-// FastAPI HTTPException envelope (e.g. the 503 "no usable provider" case).
+// FastAPI HTTPException envelope. `detail` is a string for HTTPException
+// (e.g. the 503 "no usable provider" case), but an array of validation-error
+// objects for 422 request-validation failures — normalize before rendering.
 export interface HttpErrorDetail {
-  detail?: string;
+  detail?: string | unknown[];
 }
