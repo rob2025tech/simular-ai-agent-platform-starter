@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any
 
 from fastapi import FastAPI, HTTPException
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from app import agent, router
@@ -48,3 +50,12 @@ async def agent_run(body: RunRequest) -> dict[str, Any]:
         return await agent.run(body.input, body.max_steps)
     except RuntimeError as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+
+# Optional same-origin serving of the built React frontend.
+# Purely additive: mounted LAST so it never shadows the JSON routes or /docs,
+# and guarded so the backend behaves exactly as before when frontend/dist is
+# absent (e.g. fresh clone, or dev via `npm run dev` + Vite proxy).
+_DIST = Path(__file__).resolve().parent.parent / "frontend" / "dist"
+if _DIST.is_dir():
+    app.mount("/", StaticFiles(directory=_DIST, html=True), name="ui")
